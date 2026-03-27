@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     [Header("Level Stats")]
     public float currentSpeed = 5.0f;
     public int donutsCollected = 0;
-    public int donutsNeeded = 3;
+    public int donutsNeeded = 4;
 
     [Header("Note Tracking")]
     public int totalNotesInLevel = 20;
