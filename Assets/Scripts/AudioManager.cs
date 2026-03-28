@@ -33,6 +33,14 @@ public class AudioManager : MonoBehaviour
         {
             backgroundMusic.clip = backgroundMusicClip;
             backgroundMusic.loop = true;
+
+        }
+    }
+
+    public void StartBackgroundMusic()
+    {
+        if (backgroundMusic != null && !backgroundMusic.isPlaying)
+        {
             backgroundMusic.Play();
         }
     }

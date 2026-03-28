@@ -154,7 +154,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-
         if (won)
         {
             if (winScreen) winScreen.SetActive(true);

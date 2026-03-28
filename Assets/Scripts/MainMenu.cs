@@ -2,15 +2,46 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
 public class MainMenu : MonoBehaviour
 {
+
+    [Header("Intro Settings")]
+    public GameObject introObject;
+    public VideoPlayer introVideo;
+    public GameObject menuButtons; 
+
+    private bool isIntroPlaying = true;
+
     public GameObject controlsPanel;
 
     public void SelectLevel1() => StartLevel(5, 4.0f, 20, 0.5f);
     public void SelectLevel2() => StartLevel(8, 5f, 34, 0.3f);
     public void SelectLevel3() => StartLevel(10, 6.8f, 50, 0.3f);
 
+    void Start()
+    {
+        if (introObject) introObject.SetActive(true);
+        if (menuButtons) menuButtons.SetActive(false);
+
+        if (introVideo != null)
+        {
+            introVideo.enabled = true;
+            introVideo.Play();
+            introVideo.loopPointReached += (vp) => EndIntro();
+        }
+
+        StartCoroutine(AutoEndIntro());
+    }
+
+    void Update()
+    {
+        if (isIntroPlaying && Input.anyKeyDown)
+        {
+            EndIntro();
+        }
+    }
 
     public void StartLevel(int donuts, float speed, int totalNotes, float interval)
     {
@@ -24,4 +55,26 @@ public class MainMenu : MonoBehaviour
 
     public void OpenControls() => controlsPanel.SetActive(true);
     public void CloseControls() => controlsPanel.SetActive(false);
+
+    IEnumerator AutoEndIntro()
+    {
+        yield return new WaitForSeconds(18f);
+        if (isIntroPlaying) EndIntro();
+    }
+
+    void EndIntro()
+    {
+        if (!isIntroPlaying) return; 
+
+        isIntroPlaying = false;
+
+        if (introVideo != null) introVideo.Stop(); 
+        if (introObject) introObject.SetActive(false);
+        if (menuButtons) menuButtons.SetActive(true);
+
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.StartBackgroundMusic();
+        }
+    }
 }
