@@ -25,6 +25,9 @@ public class GameManager : MonoBehaviour
     public GameObject winScreen;
     public GameObject failScreen;
 
+    [Header("Animations")]
+    public Animator billyAnimator;
+
     private bool isGameOver = false;
 
     private void Awake()
@@ -137,7 +140,20 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ShowEndScreenRoutine(bool won)
     {
-        yield return new WaitForSeconds(1.0f);
+
+        yield return new WaitForSeconds(1f);
+        if (billyAnimator != null)
+        {
+            if (won)
+            {
+                billyAnimator.SetTrigger("Win");
+            }
+            else
+            {
+                billyAnimator.SetTrigger("Fail");
+            }
+        }
+
 
         if (won)
         {
