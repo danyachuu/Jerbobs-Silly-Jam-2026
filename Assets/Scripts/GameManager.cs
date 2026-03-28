@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     [Header("Level Stats")]
     public float currentSpeed = 5.0f;
     public int donutsCollected = 0;
-    public int donutsNeeded = 4;
+    public int donutsNeeded;
 
     [Header("Note Tracking")]
     public int totalNotesInLevel = 20;
@@ -21,13 +21,22 @@ public class GameManager : MonoBehaviour
     public int perfectCount = 0;
     public int greatCount = 0;
 
+    private bool isGameOver = false;
+
     private void Awake()
     {
         instance = this;
     }
+    void Start()
+    {
+        donutsNeeded = GameConfig.DonutsNeeded;
+        currentSpeed = GameConfig.NoteSpeed;
+        totalNotesInLevel = GameConfig.TotalNotes;
+    }
 
     public void RegisterHit(string rating)
     {
+        if (isGameOver) return;
         notesProcessed++;
 
         if (rating == "Perfect")
@@ -66,14 +75,11 @@ public class GameManager : MonoBehaviour
         ResetSequence();
         Debug.Log("DONUT OBTAINED! Total: " + donutsCollected);
 
-        if (donutsCollected >= donutsNeeded)
-        {
-            WinLevel();
-        }
     }
 
     public void NoteMissed()
     {
+        if (isGameOver) return;
         notesProcessed++;
         ResetSequence();
         CheckLevelStatus();
@@ -87,23 +93,43 @@ public class GameManager : MonoBehaviour
 
     void CheckLevelStatus()
     {
-        if (notesProcessed >= totalNotesInLevel && donutsCollected < donutsNeeded)
+        if (notesSpawned >= totalNotesInLevel && notesProcessed >= notesSpawned)
         {
-            FailLevel();
+            if (donutsCollected >= donutsNeeded)
+            {
+                WinLevel();
+            }
+            else
+            {
+                FailLevel();
+            }
         }
     }
 
     void WinLevel()
     {
+        if (isGameOver) return;
+        isGameOver = true;
         Debug.Log("LEVEL COMPLETE! Loading next...");
+        StartCoroutine(ReturnToMenuAfterDelay());
         // For now, just reload or stop spawning
         // SceneManager.LoadScene("NextLevelName"); 
     }
 
     void FailLevel()
     {
-        Debug.Log("FAILED! Not enough donuts for the child.");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (isGameOver) return;
+        isGameOver = true;
+
+        Debug.Log("FAILED! Returning to menu in 4 seconds...");
+        StartCoroutine(ReturnToMenuAfterDelay());
+    }
+
+    IEnumerator ReturnToMenuAfterDelay()
+    {
+
+        yield return new WaitForSeconds(4f);
+        SceneManager.LoadScene("MainMenu");
     }
 
 }

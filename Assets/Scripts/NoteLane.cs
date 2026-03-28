@@ -7,18 +7,18 @@ public class NoteLane : MonoBehaviour
 {
     public KeyCode keyToPress;
     public Transform indicator;
-    public TextMeshProUGUI laneFeedbackText;
+    public SpriteRenderer feedbackRenderer;
 
-    public Color perfectColor = Color.cyan;
-    public Color greatColor = Color.green;
-    public Color goodColor = Color.yellow;
-    public Color missColor = Color.grey;
+    public Sprite perfectSprite;
+    public Sprite greatSprite;
+    public Sprite goodSprite;
+    public Sprite missSprite;
 
     private List<NoteObject> notesInLane = new List<NoteObject>();
 
     void Start()
     {
-        if (laneFeedbackText != null) laneFeedbackText.text = " ";
+        if (feedbackRenderer != null) feedbackRenderer.sprite = null;
     }
 
     void Update()
@@ -28,28 +28,27 @@ public class NoteLane : MonoBehaviour
             NoteObject note = notesInLane[0];
             float distance = Mathf.Abs(note.transform.position.y - indicator.position.y);
 
-            if (distance < 0.2f) ProcessHit("Perfect", perfectColor);
-            else if (distance < 0.5f) ProcessHit("Great", greatColor);
-            else if (distance < 0.8f) ProcessHit("Good", goodColor);
+            if (distance < 0.2f) ProcessHit("Perfect", perfectSprite);
+            else if (distance < 0.5f) ProcessHit("Great", greatSprite);
+            else if (distance < 0.8f) ProcessHit("Good", goodSprite);
 
             notesInLane.RemoveAt(0);
             Destroy(note.gameObject);
         }
     }
-    void ProcessHit(string rating, Color col)
+    void ProcessHit(string rating, Sprite hitSprite)
     {
         GameManager.instance.RegisterHit(rating);
-        ShowVisualFeedback(rating, col);
+        ShowFeedback(hitSprite);
     }
-    public void ShowVisualFeedback(string msg, Color col)
+    public void ShowFeedback(Sprite s)
     {
-        if (laneFeedbackText == null) return;
+        if (feedbackRenderer == null) return;
 
-        laneFeedbackText.text = msg;
-        laneFeedbackText.color = col;
+        feedbackRenderer.sprite = s;
 
-        CancelInvoke("ClearText");
-        Invoke("ClearText", 0.4f);
+        CancelInvoke("ClearFeedback");
+        Invoke("ClearFeedback", 0.4f);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -63,19 +62,15 @@ public class NoteLane : MonoBehaviour
         {
             notesInLane.Remove(other.GetComponent<NoteObject>());
             GameManager.instance.NoteMissed();
-            ShowVisualFeedback("Miss", missColor);
+            ShowFeedback(missSprite);
             Destroy(other.gameObject);
         }
     }
-    void ClearText()
-    {
-        if (laneFeedbackText != null)
-        {
-            laneFeedbackText.text = " ";
-        }
-    }
 
-   
+    void ClearFeedback()
+    {
+        if (feedbackRenderer != null) feedbackRenderer.sprite = null;
+    }
 
 
 }
