@@ -26,20 +26,32 @@ public class NoteLane : MonoBehaviour
         if (Input.GetKeyDown(keyToPress) && notesInLane.Count > 0)
         {
             NoteObject note = notesInLane[0];
+            notesInLane.RemoveAt(0);
             float distance = Mathf.Abs(note.transform.position.y - indicator.position.y);
 
             if (distance < 0.2f) ProcessHit("Perfect", perfectSprite);
             else if (distance < 0.5f) ProcessHit("Great", greatSprite);
             else if (distance < 0.8f) ProcessHit("Good", goodSprite);
 
-            notesInLane.RemoveAt(0);
+
             Destroy(note.gameObject);
         }
     }
     void ProcessHit(string rating, Sprite hitSprite)
     {
         GameManager.instance.RegisterHit(rating);
+
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlaySFX(AudioManager.instance.hitSound);
+        }
+
         ShowFeedback(hitSprite);
+
+        if (CharacterDancer.instance != null)
+        {
+            CharacterDancer.instance.Dance(keyToPress);
+        }
     }
     public void ShowFeedback(Sprite s)
     {

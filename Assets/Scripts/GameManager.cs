@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour
     public int perfectCount = 0;
     public int greatCount = 0;
 
+    [Header("End Screens")]
+    public GameObject winScreen;
+    public GameObject failScreen;
+
     private bool isGameOver = false;
 
     private void Awake()
@@ -32,6 +36,9 @@ public class GameManager : MonoBehaviour
         donutsNeeded = GameConfig.DonutsNeeded;
         currentSpeed = GameConfig.NoteSpeed;
         totalNotesInLevel = GameConfig.TotalNotes;
+
+        if (winScreen) winScreen.SetActive(false);
+        if (failScreen) failScreen.SetActive(false);
     }
 
     public void RegisterHit(string rating)
@@ -93,7 +100,7 @@ public class GameManager : MonoBehaviour
 
     void CheckLevelStatus()
     {
-        if (notesSpawned >= totalNotesInLevel && notesProcessed >= notesSpawned)
+        if (notesProcessed >= totalNotesInLevel && !isGameOver)
         {
             if (donutsCollected >= donutsNeeded)
             {
@@ -110,10 +117,11 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
-        Debug.Log("LEVEL COMPLETE! Loading next...");
-        StartCoroutine(ReturnToMenuAfterDelay());
-        // For now, just reload or stop spawning
-        // SceneManager.LoadScene("NextLevelName"); 
+
+        if (AudioManager.instance != null && AudioManager.instance.backgroundMusic != null)
+            AudioManager.instance.backgroundMusic.Stop();
+
+        StartCoroutine(ShowEndScreenRoutine(true));
     }
 
     void FailLevel()
@@ -121,14 +129,27 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
 
-        Debug.Log("FAILED! Returning to menu in 4 seconds...");
-        StartCoroutine(ReturnToMenuAfterDelay());
+        if (AudioManager.instance != null && AudioManager.instance.backgroundMusic != null)
+            AudioManager.instance.backgroundMusic.Stop();
+
+        StartCoroutine(ShowEndScreenRoutine(false));
     }
 
-    IEnumerator ReturnToMenuAfterDelay()
+    IEnumerator ShowEndScreenRoutine(bool won)
     {
+        yield return new WaitForSeconds(1.0f);
 
-        yield return new WaitForSeconds(4f);
+        if (won)
+        {
+            if (winScreen) winScreen.SetActive(true);
+            if (AudioManager.instance != null) AudioManager.instance.PlaySFX(AudioManager.instance.winSound);
+        }
+        else
+        {
+            if (failScreen) failScreen.SetActive(true);
+            if (AudioManager.instance != null) AudioManager.instance.PlaySFX(AudioManager.instance.loseSound);
+        }
+        yield return new WaitForSeconds(4.0f);
         SceneManager.LoadScene("MainMenu");
     }
 
